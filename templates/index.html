@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoterOne - 360° Indian Election Concierge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF9933;
+            --secondary: #138808;
+            --accent: #000080;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            padding: 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            background: linear-gradient(to right, var(--primary), white, var(--secondary));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, var(--primary), #e67e22);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        #chat-results {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .hidden { display: none; }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VoterOne</h1>
+        <p class="subtitle">360° Indian Election Concierge</p>
+
+        <!-- Phase 1: Eligibility -->
+        <div id="phase1" class="card">
+            <p>Namaste! Let's get you ready. What is your year of birth?</p>
+            <input type="number" id="yob" placeholder="e.g. 1995">
+            <button onclick="checkEligibility()">Get Started</button>
+        </div>
+
+        <!-- Phase 2: Under 18 Mission -->
+        <div id="phase_under18" class="card hidden">
+            <h3>Future Voter Mission 🇮🇳</h3>
+            <p id="under18_msg"></p>
+            <div class="tag">Task: Parent Voting Guide Created</div>
+            <button onclick="location.reload()" style="margin-top: 20px; background: #475569;">Back</button>
+        </div>
+
+        <!-- Phase 3: Location Details -->
+        <div id="phase2" class="card hidden">
+            <h3>Location Details</h3>
+            <input type="text" id="state" placeholder="State (e.g. Tamil Nadu)">
+            <input type="text" id="pc" placeholder="Parliamentary Constituency">
+            <input type="text" id="ac" placeholder="Assembly Constituency">
+            <button onclick="saveDetails()">Access Election Hub</button>
+        </div>
+
+        <!-- Phase 4: Election Hub -->
+        <div id="hub" class="card hidden">
+            <h3>Election Hub 📍</h3>
+            <div id="hub_content"></div>
+            <hr style="border: 0.5px solid var(--border); margin: 1rem 0;">
+            <h4>Ask VoterOne AI</h4>
+            <input type="text" id="query" placeholder="Ask about voting, NOTA, or booths...">
+            <button onclick="askAI()" style="background: var(--secondary);">Ask AI</button>
+            <div id="chat-results"></div>
+        </div>
+
+    </div>
+
+    <script>
+        async function checkEligibility() {
+            const yob = document.getElementById('yob').value;
+            const res = await fetch('/api/init', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({year_of_birth: yob})
+            });
+            const data = await res.json();
+            
+            document.getElementById('phase1').classList.add('hidden');
+            if (data.eligible) {
+                document.getElementById('phase2').classList.remove('hidden');
+            } else {
+                document.getElementById('phase_under18').classList.remove('hidden');
+                document.getElementById('under18_msg').innerText = data.message;
+            }
+        }
+
+        async function saveDetails() {
+            const state = document.getElementById('state').value;
+            const pc = document.getElementById('pc').value;
+            const ac = document.getElementById('ac').value;
+            
+            const res = await fetch('/api/details', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({state, pc, ac})
+            });
+            const data = await res.json();
+            
+            document.getElementById('phase2').classList.add('hidden');
+            document.getElementById('hub').classList.remove('hidden');
+            
+            const status = data.status;
+            let html = `<p><b>State:</b> ${data.state}</p>`;
+            html += `<p><b>Status:</b> ${status.Status || 'Active'}</p>`;
+            if (status['Poll Date']) html += `<p><b>Poll Date:</b> ${status['Poll Date']}</p>`;
+            
+            html += `<br><p>🔗 <a href="https://electoralsearch.eci.gov.in" target="_blank" style="color: var(--primary)">ECI Booth Finder</a></p>`;
+            
+            document.getElementById('hub_content').innerHTML = html;
+        }
+
+        async function askAI() {
+            const query = document.getElementById('query').value;
+            const chatDiv = document.getElementById('chat-results');
+            chatDiv.innerHTML = "Thinking...";
+            
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({query})
+            });
+            const data = await res.json();
+            chatDiv.innerHTML = `<b>VoterOne:</b> ${data.response}`;
+        }
+    </script>
+</body>
+</html>
