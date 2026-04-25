@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VoterOne - 360° Indian Election Concierge</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #FF9933;
@@ -13,10 +13,11 @@
             --bg: #0f172a;
             --glass: rgba(255, 255, 255, 0.05);
             --border: rgba(255, 255, 255, 0.1);
+            --text-muted: #94a3b8;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             background: radial-gradient(circle at top left, #1e293b, #0f172a);
             color: white;
             margin: 0;
@@ -29,19 +30,25 @@
 
         .container {
             width: 90%;
-            max-width: 600px;
-            padding: 2rem;
+            max-width: 650px;
+            padding: 2.5rem;
             background: var(--glass);
-            backdrop-filter: blur(12px);
-            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            border-radius: 32px;
             border: 1px solid var(--border);
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.8s ease-out;
+            animation: fadeIn 1s ease-out;
+            position: relative;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
         h1 {
@@ -49,121 +56,240 @@
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 3rem;
+            margin: 0;
+            font-weight: 700;
         }
 
         .subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 2rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
             border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+        }
+
+        .intro-text {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: center;
         }
 
         input, select {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
+            padding: 14px;
+            margin: 12px 0;
+            border-radius: 12px;
             border: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(15, 23, 42, 0.5);
             color: white;
             box-sizing: border-box;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
         }
 
         button {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(to right, var(--primary), #e67e22);
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), #e67e22);
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1rem;
             cursor: pointer;
-            transition: transform 0.2s, background 0.3s;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
         button:hover {
-            transform: scale(1.02);
-            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(255, 153, 51, 0.4);
+        }
+
+        button.outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            margin-top: 15px;
+        }
+
+        button.outline:hover {
+            background: var(--glass);
+        }
+
+        .checklist {
+            text-align: left;
+            margin: 1.5rem 0;
+            padding-left: 1rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .checklist-item input {
+            width: 18px;
+            margin-right: 12px;
         }
 
         #chat-results {
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
-            margin-top: 1rem;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            margin-top: 1.5rem;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            border-left: 4px solid var(--primary);
         }
 
         .hidden { display: none; }
 
-        .tag {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            margin-right: 8px;
-            background: var(--accent);
+        .error-msg {
+            color: #f87171;
+            font-size: 0.85rem;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            display: none;
         }
+
+        .download-btn {
+            background: var(--accent);
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            padding: 14px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+
+        .poll-card {
+            background: rgba(19, 136, 8, 0.1);
+            border: 1px solid var(--secondary);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>VoterOne</h1>
-        <p class="subtitle">360° Indian Election Concierge</p>
-
-        <!-- Phase 1: Eligibility -->
-        <div id="phase1" class="card">
-            <p>Namaste! Let's get you ready. What is your year of birth?</p>
-            <input type="number" id="yob" placeholder="e.g. 1995">
-            <button onclick="checkEligibility()">Get Started</button>
+        <div class="logo-section">
+            <h1>VoterOne</h1>
+            <p class="subtitle">360° Indian Election Concierge</p>
         </div>
 
-        <!-- Phase 2: Under 18 Mission -->
+        <!-- Initial Screen -->
+        <div id="phase_init" class="card">
+            <p class="intro-text">
+                Welcome to VoterOne, your premium guide to the world's largest democracy. 
+                Whether you're a first-time voter or a future citizen, we help you navigate 
+                timelines, identify constituencies, and sharpen your civic awareness.
+            </p>
+            <p style="text-align: center;">To begin your journey, what is your year of birth?</p>
+            <input type="number" id="yob" placeholder="e.g. 2004">
+            <div id="yob_error" class="error-msg">Please enter a valid birth year.</div>
+            <button onclick="checkEligibility()">Enter the Workspace</button>
+        </div>
+
+        <!-- Future Voter View -->
         <div id="phase_under18" class="card hidden">
-            <h3>Future Voter Mission 🇮🇳</h3>
-            <p id="under18_msg"></p>
-            <div class="tag">Task: Parent Voting Guide Created</div>
-            <button onclick="location.reload()" style="margin-top: 20px; background: #475569;">Back</button>
+            <div style="text-align: center;">
+                <h2 style="color: var(--primary);">Future Voter Mission 🇮🇳</h2>
+                <p id="under18_msg" style="font-size: 1.1rem;"></p>
+            </div>
+            <div class="checklist">
+                <h4>Your Parent Voting Checklist:</h4>
+                <div class="checklist-item"><input type="checkbox"> Verify Voter ID on electoralsearch.eci.gov.in</div>
+                <div class="checklist-item"><input type="checkbox"> Locate the Polling Booth</div>
+                <div class="checklist-item"><input type="checkbox"> Ensure Valid Photo ID is ready</div>
+                <div class="checklist-item"><input type="checkbox"> Mark the calendar for Poll Day</div>
+                <div class="checklist-item"><input type="checkbox"> Check for the ink mark after they vote!</div>
+            </div>
+            <a href="/api/download_guide" class="download-btn">📥 Download Guide for Parents</a>
+            <button class="outline" onclick="resetApp()">Reset and Start Over</button>
         </div>
 
-        <!-- Phase 3: Location Details -->
-        <div id="phase2" class="card hidden">
-            <h3>Location Details</h3>
-            <input type="text" id="state" placeholder="State (e.g. Tamil Nadu)">
-            <input type="text" id="pc" placeholder="Parliamentary Constituency">
-            <input type="text" id="ac" placeholder="Assembly Constituency">
-            <button onclick="saveDetails()">Access Election Hub</button>
+        <!-- Location Selection -->
+        <div id="phase_location" class="card hidden">
+            <h3>Identity & Domain</h3>
+            <p class="intro-text">Perfect. Let's map your location to the 2026 election grid.</p>
+            
+            <label>Select Your State</label>
+            <select id="state">
+                <option value="">-- Choose State --</option>
+                {% for state in states %}
+                <option value="{{ state }}">{{ state }}</option>
+                {% endfor %}
+            </select>
+            <div id="state_error" class="error-msg">Please select a state.</div>
+
+            <input type="text" id="pc" placeholder="Parliamentary Constituency (PC)">
+            <input type="text" id="ac" placeholder="Assembly Constituency (AC)">
+            
+            <button onclick="saveDetails()">Establish Connection</button>
+            <button class="outline" onclick="resetApp()">Back</button>
         </div>
 
-        <!-- Phase 4: Election Hub -->
+        <!-- Election Hub -->
         <div id="hub" class="card hidden">
-            <h3>Election Hub 📍</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>Election Hub 📍</h3>
+                <button onclick="resetApp()" style="width: auto; padding: 5px 15px; margin: 0; font-size: 0.8rem; background: #334155;">Reset</button>
+            </div>
             <div id="hub_content"></div>
-            <hr style="border: 0.5px solid var(--border); margin: 1rem 0;">
+            
+            <hr style="border: 0.5px solid var(--border); margin: 2rem 0;">
+            
             <h4>Ask VoterOne AI</h4>
-            <input type="text" id="query" placeholder="Ask about voting, NOTA, or booths...">
-            <button onclick="askAI()" style="background: var(--secondary);">Ask AI</button>
-            <div id="chat-results"></div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Get expert insights on NOTA, Booth procedures, or the 2026 timeline.</p>
+            <input type="text" id="query" placeholder="e.g. What is the value of NOTA?">
+            <button id="ask-btn" onclick="askAI()" style="background: var(--secondary);">Analyze & Respond</button>
+            <div id="chat-results" class="hidden"></div>
         </div>
 
     </div>
 
     <script>
+        function resetApp() {
+            location.reload();
+        }
+
+        function showError(id, show) {
+            document.getElementById(id).style.display = show ? 'block' : 'none';
+        }
+
         async function checkEligibility() {
             const yob = document.getElementById('yob').value;
+            if (!yob || yob < 1900 || yob > 2026) {
+                showError('yob_error', true);
+                return;
+            }
+            showError('yob_error', false);
+
             const res = await fetch('/api/init', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -171,9 +297,9 @@
             });
             const data = await res.json();
             
-            document.getElementById('phase1').classList.add('hidden');
+            document.getElementById('phase_init').classList.add('hidden');
             if (data.eligible) {
-                document.getElementById('phase2').classList.remove('hidden');
+                document.getElementById('phase_location').classList.remove('hidden');
             } else {
                 document.getElementById('phase_under18').classList.remove('hidden');
                 document.getElementById('under18_msg').innerText = data.message;
@@ -185,6 +311,12 @@
             const pc = document.getElementById('pc').value;
             const ac = document.getElementById('ac').value;
             
+            if (!state) {
+                showError('state_error', true);
+                return;
+            }
+            showError('state_error', false);
+
             const res = await fetch('/api/details', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -192,31 +324,50 @@
             });
             const data = await res.json();
             
-            document.getElementById('phase2').classList.add('hidden');
+            document.getElementById('phase_location').classList.add('hidden');
             document.getElementById('hub').classList.remove('hidden');
             
             const status = data.status;
-            let html = `<p><b>State:</b> ${data.state}</p>`;
-            html += `<p><b>Status:</b> ${status.Status || 'Active'}</p>`;
-            if (status['Poll Date']) html += `<p><b>Poll Date:</b> ${status['Poll Date']}</p>`;
-            
-            html += `<br><p>🔗 <a href="https://electoralsearch.eci.gov.in" target="_blank" style="color: var(--primary)">ECI Booth Finder</a></p>`;
+            let html = `
+                <p><b>State:</b> ${data.state}</p>
+                <div class="poll-card">
+                    <p><b>Current Status:</b> ${status.Status || 'Active Profile'}</p>
+                    ${status.Description ? `<p style="font-size: 0.9rem; opacity: 0.8;">${status.Description}</p>` : ''}
+                    ${status['Poll Date'] ? `<p>📅 <b>Poll Date:</b> ${status['Poll Date']}</p>` : ''}
+                </div>
+                <p style="margin-top: 15px;">🔗 <a href="https://electoralsearch.eci.gov.in" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">Open Official Booth Finder</a></p>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Use your EPIC number on the ECI portal to find your exact polling station.</p>
+            `;
             
             document.getElementById('hub_content').innerHTML = html;
         }
 
         async function askAI() {
             const query = document.getElementById('query').value;
+            if (!query) return;
+
             const chatDiv = document.getElementById('chat-results');
-            chatDiv.innerHTML = "Thinking...";
+            const btn = document.getElementById('ask-btn');
             
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({query})
-            });
-            const data = await res.json();
-            chatDiv.innerHTML = `<b>VoterOne:</b> ${data.response}`;
+            chatDiv.classList.remove('hidden');
+            chatDiv.innerHTML = "<i>VoterOne is analyzing your request...</i>";
+            btn.disabled = true;
+            btn.innerText = "Analyzing...";
+            
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({query})
+                });
+                const data = await res.json();
+                chatDiv.innerHTML = `<b>Concierge Response:</b><br>${data.response}`;
+            } catch (e) {
+                chatDiv.innerHTML = "<span style='color: #f87171;'>Connection error. Please try again.</span>";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Analyze & Respond";
+            }
         }
     </script>
 </body>

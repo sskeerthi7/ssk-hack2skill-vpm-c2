@@ -1,0 +1,25 @@
+.gcloudignore
+.git
+.gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv
+env/
+venv/
+.vscode/
+.gemini/
+.config/
+.npm/
+.cache/
+.codeoss/
+test_profile.json
+voter_profile.json
+PARENT_VOTING_GUIDE.md
+ELECTION_HUB.md
+test_voter_one.py
+voter_one.py
+# Ignore any other irrelevant folders
+ssk-hack2skill-main/
