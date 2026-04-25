@@ -436,12 +436,15 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({query})
                 });
-                if (!res.ok) throw new Error(await res.text());
                 const data = await res.json();
-                chatDiv.innerHTML = `<b>Official Guidance:</b><br>${data.response}`;
+                if (!res.ok) {
+                    chatDiv.innerHTML = `<span style='color: #f87171;'><b>Analyzer Error:</b><br>${data.response || 'Unknown server error'}</span>`;
+                } else {
+                    chatDiv.innerHTML = `<b>Official Guidance:</b><br>${data.response}`;
+                }
             } catch (e) {
                 console.error(e);
-                chatDiv.innerHTML = `<span style='color: #f87171;'><b>Source Connectivity Issue:</b><br>Could not establish secure handshake with the AI core. Please check your network or try again.</span>`;
+                chatDiv.innerHTML = `<span style='color: #f87171;'><b>Network Issue:</b><br>Could not reach the AI gateway. Please check your internet or server status.</span>`;
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Consult AI";
