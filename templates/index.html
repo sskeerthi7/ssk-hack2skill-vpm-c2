@@ -7,42 +7,71 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #FF9933;
-            --secondary: #138808;
-            --accent: #000080;
+            --saffron: #FF9933;
+            --white: #FFFFFF;
+            --green: #138808;
+            --navy: #000080;
             --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.08); /* Slightly more prominent glass */
+            --border: rgba(255, 255, 255, 0.15);
             --text-muted: #94a3b8;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
             background: radial-gradient(circle at top left, #1e293b, #0f172a);
-            color: white;
+            color: var(--white);
             margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-links a {
+            color: var(--saffron);
+            text-decoration: none;
+            font-size: 0.85rem;
+            margin-left: 1.5rem;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .header-links a:hover {
+            color: var(--green);
+        }
+
+        .main-content {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
+            padding: 2rem;
         }
 
         .container {
-            width: 90%;
-            max-width: 650px;
+            width: 100%;
+            max-width: 600px;
             padding: 2.5rem;
             background: var(--glass);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
             border-radius: 32px;
             border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 1s ease-out;
-            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.8s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -52,29 +81,28 @@
         }
 
         h1 {
-            background: linear-gradient(to right, var(--primary), white, var(--secondary));
+            background: linear-gradient(to right, var(--saffron), var(--white), var(--green));
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 3rem;
+            font-size: 3.2rem;
             margin: 0;
-            font-weight: 700;
+            font-weight: 800;
         }
 
         .subtitle {
             color: var(--text-muted);
-            font-size: 1.1rem;
-            letter-spacing: 1px;
+            font-size: 1rem;
+            letter-spacing: 2px;
             margin-top: 0.5rem;
+            text-transform: uppercase;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 20px;
             padding: 2rem;
-            margin-bottom: 2rem;
             border: 1px solid var(--border);
-            transition: transform 0.3s ease;
         }
 
         .intro-text {
@@ -85,40 +113,49 @@
             text-align: center;
         }
 
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            color: var(--saffron);
+            font-weight: 600;
+        }
+
         input, select {
             width: 100%;
-            padding: 14px;
-            margin: 12px 0;
+            padding: 15px;
+            margin-bottom: 20px;
             border-radius: 12px;
             border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(0, 0, 0, 0.4);
             color: white;
             box-sizing: border-box;
             font-size: 1rem;
             outline: none;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
 
         input:focus, select:focus {
-            border-color: var(--primary);
+            border-color: var(--saffron);
+            box-shadow: 0 0 0 4px rgba(255, 153, 51, 0.1);
         }
 
         button {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary), #e67e22);
+            padding: 15px;
+            background: linear-gradient(135deg, var(--saffron), #e67e22);
             border: none;
             border-radius: 12px;
             color: white;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 10px;
         }
 
         button:hover {
             transform: translateY(-2px);
+            filter: brightness(1.1);
             box-shadow: 0 10px 20px -5px rgba(255, 153, 51, 0.4);
         }
 
@@ -128,167 +165,197 @@
             margin-top: 15px;
         }
 
-        button.outline:hover {
-            background: var(--glass);
+        button.reset-btn {
+            background: #475569;
+            width: auto;
+            padding: 8px 16px;
+            font-size: 0.85rem;
         }
+
+        .download-btn {
+            background: var(--green);
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            margin-top: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .download-btn:hover { transform: scale(1.02); }
 
         .checklist {
             text-align: left;
             margin: 1.5rem 0;
-            padding-left: 1rem;
         }
 
         .checklist-item {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: #e2e8f0;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .checklist-item input {
-            width: 18px;
-            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            margin-bottom: 0;
+            margin-right: 15px;
+            cursor: pointer;
         }
 
         #chat-results {
-            max-height: 250px;
+            max-height: 300px;
             overflow-y: auto;
             margin-top: 1.5rem;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
             font-size: 0.95rem;
-            line-height: 1.6;
-            border-left: 4px solid var(--primary);
+            border-left: 6px solid var(--saffron);
         }
 
         .hidden { display: none; }
 
-        .error-msg {
-            color: #f87171;
-            font-size: 0.85rem;
-            margin-top: -8px;
-            margin-bottom: 10px;
-            display: none;
-        }
-
-        .download-btn {
-            background: var(--accent);
-            text-decoration: none;
-            display: block;
+        footer {
             text-align: center;
-            padding: 14px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            margin-top: 1rem;
-        }
-
-        .poll-card {
-            background: rgba(19, 136, 8, 0.1);
-            border: 1px solid var(--secondary);
             padding: 1rem;
-            border-radius: 12px;
-            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
         }
 
+        .eci-link {
+            color: var(--green);
+            text-decoration: underline;
+        }
+
+        /* Searchable Select simulation */
+        .select-container { position: relative; }
+        
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo-section">
-            <h1>VoterOne</h1>
-            <p class="subtitle">360° Indian Election Concierge</p>
+    <header>
+        <div style="font-weight: 700; color: var(--white);">VoterOne 🇮🇳</div>
+        <div class="header-links">
+            <a href="https://www.eci.gov.in" target="_blank">ECI Home</a>
+            <a href="https://voters.eci.gov.in" target="_blank">Voter Portal</a>
+            <a href="https://results.eci.gov.in" target="_blank">Results</a>
         </div>
+    </header>
 
-        <!-- Initial Screen -->
-        <div id="phase_init" class="card">
-            <p class="intro-text">
-                Welcome to VoterOne, your premium guide to the world's largest democracy. 
-                Whether you're a first-time voter or a future citizen, we help you navigate 
-                timelines, identify constituencies, and sharpen your civic awareness.
-            </p>
-            <p style="text-align: center;">To begin your journey, what is your year of birth?</p>
-            <input type="number" id="yob" placeholder="e.g. 2004">
-            <div id="yob_error" class="error-msg">Please enter a valid birth year.</div>
-            <button onclick="checkEligibility()">Enter the Workspace</button>
-        </div>
-
-        <!-- Future Voter View -->
-        <div id="phase_under18" class="card hidden">
-            <div style="text-align: center;">
-                <h2 style="color: var(--primary);">Future Voter Mission 🇮🇳</h2>
-                <p id="under18_msg" style="font-size: 1.1rem;"></p>
+    <div class="main-content">
+        <div class="container">
+            <div class="logo-section">
+                <h1>VoterOne</h1>
+                <p class="subtitle">360° Indian Election Concierge</p>
             </div>
-            <div class="checklist">
-                <h4>Your Parent Voting Checklist:</h4>
-                <div class="checklist-item"><input type="checkbox"> Verify Voter ID on electoralsearch.eci.gov.in</div>
-                <div class="checklist-item"><input type="checkbox"> Locate the Polling Booth</div>
-                <div class="checklist-item"><input type="checkbox"> Ensure Valid Photo ID is ready</div>
-                <div class="checklist-item"><input type="checkbox"> Mark the calendar for Poll Day</div>
-                <div class="checklist-item"><input type="checkbox"> Check for the ink mark after they vote!</div>
+
+            <!-- Initial Screen -->
+            <div id="phase_init" class="card">
+                <p class="intro-text">
+                    Namaste! Navigate the spirit of democracy with VoterOne. 
+                    From eligibility checks to constituency mapping, we are your 
+                    all-in-one companion for the upcoming 2026 elections.
+                </p>
+                <label>Year of Birth</label>
+                <input type="number" id="yob" placeholder="e.g. 1998">
+                <button onclick="checkEligibility()">Get Started</button>
             </div>
-            <a href="/api/download_guide" class="download-btn">📥 Download Guide for Parents</a>
-            <button class="outline" onclick="resetApp()">Reset and Start Over</button>
-        </div>
 
-        <!-- Location Selection -->
-        <div id="phase_location" class="card hidden">
-            <h3>Identity & Domain</h3>
-            <p class="intro-text">Perfect. Let's map your location to the 2026 election grid.</p>
-            
-            <label>Select Your State</label>
-            <select id="state">
-                <option value="">-- Choose State --</option>
-                {% for state in states %}
-                <option value="{{ state }}">{{ state }}</option>
-                {% endfor %}
-            </select>
-            <div id="state_error" class="error-msg">Please select a state.</div>
-
-            <input type="text" id="pc" placeholder="Parliamentary Constituency (PC)">
-            <input type="text" id="ac" placeholder="Assembly Constituency (AC)">
-            
-            <button onclick="saveDetails()">Establish Connection</button>
-            <button class="outline" onclick="resetApp()">Back</button>
-        </div>
-
-        <!-- Election Hub -->
-        <div id="hub" class="card hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>Election Hub 📍</h3>
-                <button onclick="resetApp()" style="width: auto; padding: 5px 15px; margin: 0; font-size: 0.8rem; background: #334155;">Reset</button>
+            <!-- Future Voter View -->
+            <div id="phase_under18" class="card hidden">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <h2 style="color: var(--saffron); margin: 0;">Future Voter Mission</h2>
+                    <p id="under18_msg"></p>
+                </div>
+                <div class="checklist">
+                    <div class="checklist-item"><input type="checkbox"> Verify Parent's Voter ID</div>
+                    <div class="checklist-item"><input type="checkbox"> Pin the Polling Station</div>
+                    <div class="checklist-item"><input type="checkbox"> Check for Election Holidays</div>
+                </div>
+                <a href="/api/download_guide" class="download-btn">📲 Shareable Guide Poster (PNG)</a>
+                <button class="outline" onclick="resetApp()">Reset</button>
             </div>
-            <div id="hub_content"></div>
-            
-            <hr style="border: 0.5px solid var(--border); margin: 2rem 0;">
-            
-            <h4>Ask VoterOne AI</h4>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Get expert insights on NOTA, Booth procedures, or the 2026 timeline.</p>
-            <input type="text" id="query" placeholder="e.g. What is the value of NOTA?">
-            <button id="ask-btn" onclick="askAI()" style="background: var(--secondary);">Analyze & Respond</button>
-            <div id="chat-results" class="hidden"></div>
-        </div>
 
+            <!-- Location Selection -->
+            <div id="phase_location" class="card hidden">
+                <h3>Voter Domain 📍</h3>
+                <p class="intro-text">Map your constituency for real-time tracking.</p>
+                
+                <label>Select Your State/UT</label>
+                <select id="state">
+                    <option value="">-- Choose State --</option>
+                    {% for state in states %}
+                    <option value="{{ state }}">{{ state }}</option>
+                    {% endfor %}
+                </select>
+
+                <label>Parliamentary Constituency</label>
+                <input type="text" id="pc" placeholder="Region Name">
+                
+                <label>Assembly Constituency</label>
+                <input type="text" id="ac" placeholder="Local Area Name">
+                
+                <button onclick="saveDetails()">Enter Hub</button>
+                <button class="outline" onclick="resetApp()">Back</button>
+            </div>
+
+            <!-- Election Hub -->
+            <div id="hub" class="card hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: var(--saffron);">Election Hub</h3>
+                    <button class="reset-btn" onclick="resetApp()">ExitHub</button>
+                </div>
+                <div id="hub_content"></div>
+                
+                <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 16px;">
+                    <h4 style="margin-top: 0;">Ask AI Concierge</h4>
+                    <p style="font-size: 0.8rem; opacity: 0.7;">Verified insights from <a href="https://www.eci.gov.in" target="_blank" class="eci-link">eci.gov.in</a></p>
+                    <input type="text" id="query" placeholder="Ask about booths, ID rules, etc." style="margin-bottom: 10px;">
+                    <button id="ask-btn" onclick="askAI()" style="background: var(--navy);">Consult AI</button>
+                    <div id="chat-results" class="hidden"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        function resetApp() {
-            location.reload();
-        }
+    <footer>
+        Official Data Source: <a href="https://www.eci.gov.in" target="_blank" class="eci-link">Election Commission of India</a>
+        <br>Developed for Hack2Skill VPM Challenge 🇮🇳
+    </footer>
 
-        function showError(id, show) {
-            document.getElementById(id).style.display = show ? 'block' : 'none';
+    <script>
+        // Load initial state from LocalStorage
+        window.onload = () => {
+            const savedState = localStorage.getItem('voterOneState');
+            if (savedState) {
+                const data = JSON.parse(savedState);
+                if (data.phase === 'under18') {
+                    showUnder18(data.msg);
+                } else if (data.phase === 'location') {
+                    document.getElementById('phase_init').classList.add('hidden');
+                    document.getElementById('phase_location').classList.remove('hidden');
+                } else if (data.phase === 'hub') {
+                    restoreHub(data.hubData);
+                }
+            }
+        };
+
+        function resetApp() {
+            localStorage.removeItem('voterOneState');
+            location.reload();
         }
 
         async function checkEligibility() {
             const yob = document.getElementById('yob').value;
-            if (!yob || yob < 1900 || yob > 2026) {
-                showError('yob_error', true);
-                return;
-            }
-            showError('yob_error', false);
+            if (!yob) return;
 
             const res = await fetch('/api/init', {
                 method: 'POST',
@@ -300,22 +367,24 @@
             document.getElementById('phase_init').classList.add('hidden');
             if (data.eligible) {
                 document.getElementById('phase_location').classList.remove('hidden');
+                localStorage.setItem('voterOneState', JSON.stringify({phase: 'location'}));
             } else {
-                document.getElementById('phase_under18').classList.remove('hidden');
-                document.getElementById('under18_msg').innerText = data.message;
+                showUnder18(data.message);
+                localStorage.setItem('voterOneState', JSON.stringify({phase: 'under18', msg: data.message}));
             }
+        }
+
+        function showUnder18(msg) {
+            document.getElementById('phase_init').classList.add('hidden');
+            document.getElementById('phase_under18').classList.remove('hidden');
+            document.getElementById('under18_msg').innerText = msg;
         }
 
         async function saveDetails() {
             const state = document.getElementById('state').value;
             const pc = document.getElementById('pc').value;
             const ac = document.getElementById('ac').value;
-            
-            if (!state) {
-                showError('state_error', true);
-                return;
-            }
-            showError('state_error', false);
+            if (!state) return;
 
             const res = await fetch('/api/details', {
                 method: 'POST',
@@ -323,22 +392,29 @@
                 body: JSON.stringify({state, pc, ac})
             });
             const data = await res.json();
-            
+            restoreHub(data);
+            localStorage.setItem('voterOneState', JSON.stringify({phase: 'hub', hubData: data}));
+        }
+
+        function restoreHub(data) {
+            document.getElementById('phase_init').classList.add('hidden');
             document.getElementById('phase_location').classList.add('hidden');
             document.getElementById('hub').classList.remove('hidden');
             
             const status = data.status;
             let html = `
-                <p><b>State:</b> ${data.state}</p>
-                <div class="poll-card">
-                    <p><b>Current Status:</b> ${status.Status || 'Active Profile'}</p>
-                    ${status.Description ? `<p style="font-size: 0.9rem; opacity: 0.8;">${status.Description}</p>` : ''}
-                    ${status['Poll Date'] ? `<p>📅 <b>Poll Date:</b> ${status['Poll Date']}</p>` : ''}
+                <div style="border-left: 4px solid var(--green); padding-left: 15px;">
+                    <p style="font-size: 1.2rem; margin-bottom: 5px;"><b>${data.state}</b></p>
+                    <p style="color: var(--text-muted);">${data.pc} (PC) • ${data.ac} (AC)</p>
                 </div>
-                <p style="margin-top: 15px;">🔗 <a href="https://electoralsearch.eci.gov.in" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">Open Official Booth Finder</a></p>
-                <p style="font-size: 0.8rem; color: var(--text-muted);">Use your EPIC number on the ECI portal to find your exact polling station.</p>
+                <div style="background: rgba(255,153,51,0.1); padding: 1.5rem; border-radius: 16px; margin: 1.5rem 0; border: 1px solid var(--saffron);">
+                    <p style="color: var(--saffron); font-weight: 700; margin-top: 0;">CURRENT STATUS</p>
+                    <p style="font-size: 1.1rem;">${status.Status}</p>
+                    ${status.Description ? `<p style="font-size: 0.9rem; opacity: 0.8;">${status.Description}</p>` : ''}
+                    ${status['Poll Date'] ? `<p style="margin-bottom: 0;">📅 <b>Poll Date:</b> ${status['Poll Date']}</p>` : ''}
+                </div>
+                <a href="https://voters.eci.gov.in" target="_blank" style="color: var(--green); font-weight: 700; text-decoration: none;">🔍 Find My Polling Station →</a>
             `;
-            
             document.getElementById('hub_content').innerHTML = html;
         }
 
@@ -350,9 +426,9 @@
             const btn = document.getElementById('ask-btn');
             
             chatDiv.classList.remove('hidden');
-            chatDiv.innerHTML = "<i>VoterOne is analyzing your request...</i>";
+            chatDiv.innerHTML = "<i>VoterOne Concierge is retrieving verification...</i>";
             btn.disabled = true;
-            btn.innerText = "Analyzing...";
+            btn.innerText = "Consulting...";
             
             try {
                 const res = await fetch('/api/chat', {
@@ -360,13 +436,15 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({query})
                 });
+                if (!res.ok) throw new Error(await res.text());
                 const data = await res.json();
-                chatDiv.innerHTML = `<b>Concierge Response:</b><br>${data.response}`;
+                chatDiv.innerHTML = `<b>Official Guidance:</b><br>${data.response}`;
             } catch (e) {
-                chatDiv.innerHTML = "<span style='color: #f87171;'>Connection error. Please try again.</span>";
+                console.error(e);
+                chatDiv.innerHTML = `<span style='color: #f87171;'><b>Source Connectivity Issue:</b><br>Could not establish secure handshake with the AI core. Please check your network or try again.</span>`;
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Analyze & Respond";
+                btn.innerText = "Consult AI";
             }
         }
     </script>
