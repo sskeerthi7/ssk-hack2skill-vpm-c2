@@ -20,19 +20,28 @@ except Exception as e:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("voter_one")
 
-# Firebase Integration (Optional/Simulated for Score)
+# Firebase / Firestore Setup
 try:
     import firebase_admin
-    from firebase_admin import credentials, firestore
-    if os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH"):
-        cred = credentials.Certificate(os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH"))
-        firebase_admin.initialize_app(cred)
-        db = firestore.client()
+    from firebase_admin import credentials, firestore, storage
+    
+    cred_path = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+    if cred_path and os.path.exists(cred_path):
+        cred = credentials.Certificate(cred_path)
+        firebase_admin.initialize_app(cred, {
+            'storageBucket': os.getenv("GCS_BUCKET_NAME")
+        })
     else:
-        db = None
+        firebase_admin.initialize_app(options={
+            'storageBucket': os.getenv("GCS_BUCKET_NAME")
+        })
+    db = firestore.client()
+    bucket = storage.bucket()
+    logger.info("Firebase/GCS initialized successfully.")
 except Exception as e:
-    logger.warning(f"Firebase initialization skipped: {e}")
+    logger.warning(f"Firebase/GCS fallback enabled: {e}")
     db = None
+    bucket = None
 
 load_dotenv()
 
@@ -197,9 +206,35 @@ def chat():
         logger.error(f"AI Generation Error: {str(e)}")
         return jsonify({"response": f"Encountered an issue while analyzing your request: {str(e)}"}), 500
 
-@app.route('/api/download_guide', methods=['GET'])
+@app.route('/api/download_guide')
 def download_guide():
-    return send_from_directory('static', 'parent_guide.png', as_attachment=True)
+    """Serve the parent guide, preferring GCS if available."""
+    filename = 'parent_guide.png'
+    
+    if bucket:
+        try:
+            blob = bucket.blob(filename)
+            if blob.exists():
+                url = blob.generate_signed_url(expiration=datetime.timedelta(minutes=15))
+                # Log analytics to Firestore
+                if db:
+                    db.collection('analytics').add({
+                        'event': 'guide_download',
+                        'timestamp': firestore.SERVER_TIMESTAMP,
+                        'source': 'GCS'
+                    })
+                return jsonify({"url": url})
+        except Exception as e:
+            logger.warning(f"GCS download failed: {e}")
+
+    # Fallback to local
+    if db:
+        db.collection('analytics').add({
+            'event': 'guide_download',
+            'timestamp': firestore.SERVER_TIMESTAMP,
+            'source': 'local'
+        })
+    return send_from_directory('static', filename, as_attachment=True)
 
 @app.route('/static/<path:path>')
 def send_static(path):

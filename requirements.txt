@@ -1,8 +1,9 @@
 flask
 google-generativeai
 python-dotenv
-gunicorn
 firebase-admin
 google-cloud-logging
+google-cloud-storage
 pytest
 pytest-flask
+gunicorn

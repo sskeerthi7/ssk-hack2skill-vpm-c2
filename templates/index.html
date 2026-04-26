@@ -278,6 +278,27 @@
 
         .hidden { display: none !important; }
 
+        /* Consulting Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--saffron), #fff, var(--green));
+            animation: progress 2s infinite ease-in-out;
+        }
+        @keyframes progress {
+            0% { width: 0%; left: -100%; }
+            50% { width: 50%; }
+            100% { width: 100%; }
+        }
+
         footer {
             text-align: center;
             padding: 1.5rem;
@@ -435,7 +456,31 @@
         </p>
     </footer>
 
+    <!-- Firebase & Google SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+
     <script>
+        // Initialize Firebase (Placeholders - will work in 'demo' mode if keys missing)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDemoKey", 
+            authDomain: "voter-one.firebaseapp.com",
+            projectId: "voter-one",
+            storageBucket: "voter-one.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef",
+            measurementId: "G-DEMO"
+        };
+        
+        try {
+            firebase.initializeApp(firebaseConfig);
+            firebase.auth().signInAnonymously().catch((error) => {
+                console.warn("Firebase Auth disabled or misconfigured.");
+            });
+            if (typeof firebase.analytics === 'function') firebase.analytics();
+        } catch (e) { console.warn("Firebase initialization skipped."); }
+
         const translations = {
             en: {
                 title: "VoterOne",
@@ -464,7 +509,8 @@
                 footer_source: "Official Data Source:",
                 footer_dev: "Developed for Hack2Skill VPM Challenge",
                 consulting: "VoterOne Concierge is retrieving verification...",
-                status_label: "CURRENT STATUS"
+                status_label: "CURRENT STATUS",
+                map_label: "POLLING DOMAIN VISUALIZER"
             },
             hi: {
                 title: "VoterOne",
@@ -493,7 +539,8 @@
                 footer_source: "आधिकारिक डेटा स्रोत:",
                 footer_dev: "Hack2Skill VPM चैलेंज के लिए विकसित",
                 consulting: "VoterOne कंसीयर्ज सत्यापन प्राप्त कर रहा है...",
-                status_label: "वर्तमान स्थिति"
+                status_label: "वर्तमान स्थिति",
+                map_label: "मतदान क्षेत्र विजुअलाइज़र"
             }
         };
 
@@ -594,7 +641,12 @@
             
             const status = data.status;
             const statusLabel = translations[currentLang].status_label;
+            const mapLabel = translations[currentLang].map_label;
             
+            // Map integration
+            const mapQuery = encodeURIComponent(`${data.ac}, ${data.pc}, ${data.state}, India`);
+            const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyDemoMapKey&q=${mapQuery}`;
+
             let html = `
                 <div style="border-left: 4px solid var(--green); padding-left: 15px; margin-bottom: 1.5rem;">
                     <p style="font-size: 1.3rem; margin: 0; font-weight: 700;">${data.state}</p>
@@ -606,6 +658,14 @@
                     ${status.Description ? `<p style="font-size: 0.9rem; opacity: 0.8; line-height: 1.4;">${status.Description}</p>` : ''}
                     ${status['Poll Date'] ? `<p style="margin: 10px 0 0 0; font-size: 0.95rem;">📅 <b>Poll Date:</b> ${status['Poll Date']}</p>` : ''}
                 </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <p style="color: var(--green); font-weight: 700; margin-bottom: 8px; font-size: 0.8rem;">${mapLabel}</p>
+                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border); height: 200px; background: #000;">
+                        <iframe width="100%" height="100%" frameborder="0" style="border:0" src="${mapUrl}" allowfullscreen></iframe>
+                    </div>
+                </div>
+
                 <a href="https://voters.eci.gov.in" target="_blank" rel="noopener" style="color: var(--green); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px;">
                     🔍 Find My Polling Station →
                 </a>
@@ -621,7 +681,10 @@
             const btn = document.getElementById('ask-btn');
             
             chatDiv.classList.remove('hidden');
-            chatDiv.innerHTML = `<i>${translations[currentLang].consulting}</i>`;
+            chatDiv.innerHTML = `
+                <p><i>${translations[currentLang].consulting}</i></p>
+                <div class="progress-container"><div class="progress-bar"></div></div>
+            `;
             btn.disabled = true;
             btn.innerText = currentLang === 'en' ? "Consulting..." : "परामर्श ले रहा है...";
             
