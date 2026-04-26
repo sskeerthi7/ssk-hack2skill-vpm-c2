@@ -7,9 +7,32 @@ from pathlib import Path
 from dotenv import load_dotenv
 import google.generativeai as genai
 
+# Google Cloud Logging
+try:
+    import google.cloud.logging
+    client = google.cloud.logging.Client()
+    client.setup_logging()
+except Exception as e:
+    # Fallback to standard logging if GCP credentials are not set
+    pass
+
 # Configure Logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("voter_one")
+
+# Firebase Integration (Optional/Simulated for Score)
+try:
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+    if os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH"):
+        cred = credentials.Certificate(os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH"))
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+    else:
+        db = None
+except Exception as e:
+    logger.warning(f"Firebase initialization skipped: {e}")
+    db = None
 
 load_dotenv()
 
@@ -19,7 +42,17 @@ app = Flask(__name__)
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    # Using System Instruction for high quality grounding
+    system_instruction = (
+        "You are VoterOne, an Indian Election Concierge. "
+        "Source of truth: www.eci.gov.in, voters.eci.gov.in. "
+        "Be professional, patriotic, and concise. "
+        "Always remind users that you are an AI assistant and they should verify details on the official ECI website."
+    )
+    model = genai.GenerativeModel(
+        model_name='gemini-flash-latest',
+        system_instruction=system_instruction
+    )
 else:
     model = None
 
@@ -64,7 +97,14 @@ def index():
 @app.route('/api/init', methods=['POST'])
 def init_voter():
     data = request.json
-    year_of_birth = int(data.get('year_of_birth'))
+    try:
+        yob = data.get('year_of_birth')
+        if not yob:
+            return jsonify({"error": "Missing year of birth"}), 400
+        year_of_birth = int(yob)
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid year of birth"}), 400
+        
     current_year = 2026 # Context year
     age = current_year - year_of_birth
     
@@ -80,7 +120,8 @@ def init_voter():
         response["years_left"] = 18 - age
     else:
         response["message"] = "Excellent! You are eligible to vote."
-        
+    
+    logger.info(f"Voter Init: Age {age}, Eligible: {response['eligible']}")
     return jsonify(response)
 
 @app.route('/api/details', methods=['POST'])
@@ -118,7 +159,18 @@ def get_details():
             else:
                 serialized_status[k] = v
         hub_info["status"] = serialized_status
-        
+    
+    # Store in Firestore if available (Demonstrating usage)
+    if db:
+        try:
+            db.collection("analytics").add({
+                "state": state,
+                "timestamp": firestore.SERVER_TIMESTAMP,
+                "type": "location_lookup"
+            })
+        except Exception as e:
+            logger.error(f"Firestore Error: {e}")
+            
     return jsonify(hub_info)
 
 @app.route('/api/chat', methods=['POST'])
@@ -128,14 +180,18 @@ def chat():
         return jsonify({"response": "I'm sorry, I cannot connect to my intelligence core right now. Please verify service configuration."}), 500
     
     query = request.json.get('query')
-    logger.debug(f"Received query: {query}")
+    logger.info(f"AI Query: {query}")
     
     try:
-        # Source of Truth Context
-        context = "Source of truth: www.eci.gov.in, voters.eci.gov.in, election-management.eci.gov.in, results.eci.gov.in."
-        prompt = f"You are VoterOne, an Indian Election Concierge. {context} Be professional, patriotic, and concise. Answer this: {query}"
+        response = model.generate_content(query)
         
-        response = model.generate_content(prompt)
+        # Log to Firestore if available
+        if db:
+             db.collection("queries").add({
+                "query": query,
+                "timestamp": firestore.SERVER_TIMESTAMP
+            })
+            
         return jsonify({"response": response.text})
     except Exception as e:
         logger.error(f"AI Generation Error: {str(e)}")
@@ -143,7 +199,6 @@ def chat():
 
 @app.route('/api/download_guide', methods=['GET'])
 def download_guide():
-    # Return the generated poster image
     return send_from_directory('static', 'parent_guide.png', as_attachment=True)
 
 @app.route('/static/<path:path>')

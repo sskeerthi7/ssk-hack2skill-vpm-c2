@@ -12,7 +12,16 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 if api_key:
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # System Instruction for consistency
+    system_instruction = (
+        "You are VoterOne, an Indian Election Concierge. "
+        "Source of truth: www.eci.gov.in, voters.eci.gov.in. "
+        "Be professional, patriotic, and concise. "
+    )
+    model = genai.GenerativeModel(
+        model_name='gemini-flash-latest',
+        system_instruction=system_instruction
+    )
 else:
     model = None
 
@@ -39,7 +48,7 @@ class VoterOne:
     def __init__(self):
         self.profile = {}
         self.profile_file = "voter_profile.json"
-        self.current_year = datetime.datetime.now().year
+        self.current_year = 2026 # Context year
         self.today = datetime.date.today()
 
     def greet(self):
@@ -50,7 +59,9 @@ class VoterOne:
 
     def get_user_profile(self):
         try:
-            year_of_birth = int(input("To start, what is your year of birth? "))
+            yob_str = input("To start, what is your year of birth? ")
+            if not yob_str: return self.get_user_profile()
+            year_of_birth = int(yob_str)
             age = self.current_year - year_of_birth
             self.profile["year_of_birth"] = year_of_birth
             
@@ -141,9 +152,11 @@ As a future voter, you play a crucial role in our democracy. Use this checklist 
         if not model:
             return "I am currently in local mode. Please set GEMINI_API_KEY in .env for full AI capabilities."
         
-        prompt = f"As VoterOne, an Indian Election Concierge, answer this user query about elections: {query}. Keep it professional and helpful."
-        response = model.generate_content(prompt)
-        return response.text
+        try:
+            response = model.generate_content(query)
+            return response.text
+        except Exception as e:
+            return f"AI Error: {e}"
 
 def main():
     voter = VoterOne()
