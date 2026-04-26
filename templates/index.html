@@ -404,7 +404,7 @@
                 
                 <div class="form-group">
                     <label for="state" data-t="label_state">Select Your State/UT</label>
-                    <select id="state" onchange="updatePC()">
+                    <select id="state">
                         <option value="" data-t="opt_choose">-- Choose State --</option>
                         <option value="Tamil Nadu">Tamil Nadu</option>
                         <option value="Maharashtra">Maharashtra</option>
@@ -417,20 +417,28 @@
                 
                 <div class="form-group">
                     <label for="pc" data-t="label_pc">Parliamentary Constituency</label>
-                    <select id="pc" onchange="updateAC()">
-                        <option value="">-- Select State First --</option>
-                    </select>
+                    <input type="text" id="pc" list="pc-list" placeholder="e.g. Chennai South">
+                    <datalist id="pc-list">
+                        <option value="Chennai South">
+                        <option value="Chennai North">
+                        <option value="Mumbai South">
+                        <option value="Hyderabad">
+                    </datalist>
                 </div>
                 
                 <div class="form-group">
                     <label for="ac" data-t="label_ac">Assembly Constituency</label>
-                    <select id="ac">
-                        <option value="">-- Select PC First --</option>
-                    </select>
+                    <input type="text" id="ac" list="ac-list" placeholder="e.g. Mylapore">
+                    <datalist id="ac-list">
+                        <option value="Mylapore">
+                        <option value="Saidapet">
+                        <option value="Colaba">
+                        <option value="Charminar">
+                    </datalist>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 2rem;">
-                    <button onclick="saveDetails()" data-t="btn_hub" class="btn-primary" style="flex: 2;">Enter Hub</button>
+                    <button id="save-btn" onclick="saveDetails()" data-t="btn_hub" class="btn-primary" style="flex: 2;">Enter Hub</button>
                     <button onclick="resetApp()" data-t="btn_back" class="btn-secondary" style="flex: 1;">Back</button>
                 </div>
             </div>
@@ -689,19 +697,37 @@
             const state = document.getElementById('state').value;
             const pc = document.getElementById('pc').value;
             const ac = document.getElementById('ac').value;
-            if (!state) {
-                alert(currentLang === 'en' ? "Please select a state." : "कृपया एक राज्य चुनें।");
+            const btn = document.getElementById('save-btn');
+
+            if (!state || !pc || !ac) {
+                alert(currentLang === 'en' ? "Please complete all fields." : "कृपया सभी फ़ील्ड भरें।");
                 return;
             }
 
-            const res = await fetch('/api/details', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({state, pc, ac})
-            });
-            const data = await res.json();
-            restoreHub(data);
-            localStorage.setItem('voterOneState', JSON.stringify({phase: 'hub', hubData: data}));
+            btn.disabled = true;
+            btn.innerText = currentLang === 'en' ? "Validating..." : "सत्यापित कर रहा है...";
+
+            try {
+                const res = await fetch('/api/details', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({state, pc, ac})
+                });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    alert(data.response || "Validation failed.");
+                    return;
+                }
+
+                restoreHub(data);
+                localStorage.setItem('voterOneState', JSON.stringify({phase: 'hub', hubData: data}));
+            } catch (e) {
+                alert("Server error during validation.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = translations[currentLang].btn_hub;
+            }
         }
 
         function restoreHub(data) {
@@ -713,9 +739,12 @@
             const statusLabel = translations[currentLang].status_label;
             const mapLabel = translations[currentLang].map_label;
             
-            // Map integration
+            // Map integration with fallback for invalid keys
             const mapQuery = encodeURIComponent(`${data.ac}, ${data.pc}, ${data.state}, India`);
-            const mapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyDemoMapKey&q=${mapQuery}`;
+            const googleMapsLink = `https://www.google.com/maps/search/${mapQuery}`;
+            
+            // If the key is likely invalid (placeholder), we show a preview card instead of the broken iframe
+            const isDemoKey = firebaseConfig.apiKey.includes("Demo"); 
 
             let html = `
                 <div style="border-left: 4px solid var(--green); padding-left: 15px; margin-bottom: 1.5rem;">
@@ -731,8 +760,14 @@
 
                 <div style="margin-bottom: 1.5rem;">
                     <p style="color: var(--green); font-weight: 700; margin-bottom: 8px; font-size: 0.8rem;">${mapLabel}</p>
-                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border); height: 200px; background: #000;">
-                        <iframe width="100%" height="100%" frameborder="0" style="border:0" src="${mapUrl}" allowfullscreen></iframe>
+                    <div style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border); height: 200px; background: #000; position: relative;">
+                        ${isDemoKey ? 
+                            `<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; text-align: center;">
+                                <p style="font-size: 0.8rem; color: var(--text-muted);">Visualizer active. Click to view high-resolution satellite imagery for your polling area.</p>
+                                <a href="${googleMapsLink}" target="_blank" class="btn-secondary" style="font-size: 0.8rem; padding: 8px 16px; width: auto;">Open Google Maps Visualizer</a>
+                            </div>` :
+                            `<iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDemoMapKey&q=${mapQuery}" allowfullscreen></iframe>`
+                        }
                     </div>
                 </div>
 

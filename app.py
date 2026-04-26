@@ -134,53 +134,53 @@ def init_voter():
     return jsonify(response)
 
 @app.route('/api/details', methods=['POST'])
-def get_details():
+def save_details():
+    """Save voter details and validate constituency using AI."""
     data = request.json
     state = data.get('state')
     pc = data.get('pc')
     ac = data.get('ac')
     
-    hub_info = {"state": state, "pc": pc, "ac": ac}
+    # AI-Powered Validation
+    if model and pc and ac:
+        try:
+            validation_query = f"In India, is '{ac}' a valid Assembly Constituency and '{pc}' a valid Parliamentary Constituency within the state of '{state}'? Answer only 'Valid' or 'Invalid'. If you are unsure but they sound plausible, say 'Valid'."
+            response = model.generate_content(validation_query)
+            if "invalid" in response.text.lower():
+                return jsonify({"response": f"The constituency '{ac}' or '{pc}' does not appear to be valid for {state}. Please check the spelling."}), 400
+        except Exception as e:
+            logger.warning(f"AI Validation skipped: {e}")
+
+    result = {"state": state, "pc": pc, "ac": ac}
     
-    # Check 2026 Context
-    found = False
+    # Map the state to its 2026 status
+    status = None
     for phase, info in ELECTION_DATA_2026.items():
-        if phase != "Telangana":
-            states_list = info.get("States", [])
-            if state in states_list:
-                hub_info["status"] = info
-                found = True
-                break
+        if phase != "Telangana" and state in info.get("States", []):
+            status = info
+            break
     
-    if not found and state == "Telangana":
-        hub_info["status"] = ELECTION_DATA_2026["Telangana"]
-        found = True
-        
-    if not found:
-        hub_info["status"] = {"Status": "General election data pending for this state."}
+    if not status and state == "Telangana":
+        status = ELECTION_DATA_2026["Telangana"]
     
-    # Convert dates to strings for JSON serialization
-    if "status" in hub_info:
-        serialized_status = {}
-        for k, v in hub_info["status"].items():
-            if isinstance(v, datetime.date):
-                serialized_status[k] = v.isoformat()
-            else:
-                serialized_status[k] = v
-        hub_info["status"] = serialized_status
+    if not status:
+        status = {"Status": "General Info", "Description": "Elections scheduled for 2026. Stay tuned for dates."}
+
+    # Serialize dates
+    serialized_status = {}
+    for k, v in status.items():
+        serialized_status[k] = v.isoformat() if isinstance(v, datetime.date) else v
     
-    # Store in Firestore if available (Demonstrating usage)
+    result["status"] = serialized_status
+    
     if db:
         try:
-            db.collection("analytics").add({
-                "state": state,
-                "timestamp": firestore.SERVER_TIMESTAMP,
-                "type": "location_lookup"
+            db.collection('voter_profiles').add({
+                'state': state, 'pc': pc, 'ac': ac, 'timestamp': firestore.SERVER_TIMESTAMP
             })
-        except Exception as e:
-            logger.error(f"Firestore Error: {e}")
-            
-    return jsonify(hub_info)
+        except: pass
+
+    return jsonify(result)
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
