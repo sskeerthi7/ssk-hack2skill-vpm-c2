@@ -405,13 +405,47 @@
                 <div class="form-group">
                     <label for="state" data-t="label_state">Select Your State/UT</label>
                     <select id="state">
-                        <option value="" data-t="opt_choose">-- Choose State --</option>
-                        <option value="Tamil Nadu">Tamil Nadu</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Gujarat">Gujarat</option>
-                        <option value="West Bengal">West Bengal</option>
-                        <option value="Telangana">Telangana</option>
-                        <option value="Other">Other (General Info)</option>
+                        <option value="" data-t="opt_choose">-- Choose State/UT --</option>
+                        <optgroup label="States">
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+                        </optgroup>
+                        <optgroup label="Union Territories">
+                            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                            <option value="Chandigarh">Chandigarh</option>
+                            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                            <option value="Delhi">Delhi (NCT)</option>
+                            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                            <option value="Ladakh">Ladakh</option>
+                            <option value="Lakshadweep">Lakshadweep</option>
+                            <option value="Puducherry">Puducherry</option>
+                        </optgroup>
                     </select>
                 </div>
                 
@@ -477,69 +511,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 
     <script>
-        // Mapping for Dependent Dropdowns
-        const constituencyMap = {
-            "Tamil Nadu": {
-                "Chennai North": ["Royapuram", "Dr. Radhakrishnan Nagar", "Perambur"],
-                "Chennai South": ["Saidapet", "T. Nagar", "Mylapore"],
-                "Chennai Central": ["Chepauk-Thiruvallikeni", "Thousand Lights", "Anna Nagar"]
-            },
-            "Maharashtra": {
-                "Mumbai North": ["Borivali", "Dahisar", "Magathane"],
-                "Mumbai South": ["Colaba", "Mumbadevi", "Malabar Hill"]
-            },
-            "Telangana": {
-                "Hyderabad": ["Malakpet", "Karwan", "Goshamahal", "Charminar"],
-                "Secunderabad": ["Musheerabad", "Amberpet", "Khairatabad"]
-            },
-            "Gujarat": {
-                "Ahmedabad East": ["Vatva", "Nikol", "Naroda"],
-                "Ahmedabad West": ["Ellis Bridge", "Amraiwadi", "Dariapur"]
-            },
-            "West Bengal": {
-                "Kolkata North": ["Chowrangee", "Entally", "Beliaghata"],
-                "Kolkata South": ["Kasba", "Behala Purba", "Behala Paschim"]
-            },
-            "Other": {
-                "General Region": ["Local Area 1", "Local Area 2"]
-            }
-        };
-
-        function updatePC() {
-            const state = document.getElementById('state').value;
-            const pcSelect = document.getElementById('pc');
-            const acSelect = document.getElementById('ac');
-            
-            pcSelect.innerHTML = '<option value="">-- Choose PC --</option>';
-            acSelect.innerHTML = '<option value="">-- Select PC First --</option>';
-
-            if (state && constituencyMap[state]) {
-                Object.keys(constituencyMap[state]).forEach(pc => {
-                    const opt = document.createElement('option');
-                    opt.value = pc;
-                    opt.innerText = pc;
-                    pcSelect.appendChild(opt);
-                });
-            }
-        }
-
-        function updateAC() {
-            const state = document.getElementById('state').value;
-            const pc = document.getElementById('pc').value;
-            const acSelect = document.getElementById('ac');
-            
-            acSelect.innerHTML = '<option value="">-- Choose AC --</option>';
-
-            if (state && pc && constituencyMap[state][pc]) {
-                constituencyMap[state][pc].forEach(ac => {
-                    const opt = document.createElement('option');
-                    opt.value = ac;
-                    opt.innerText = ac;
-                    acSelect.appendChild(opt);
-                });
-            }
-        }
-
         // Initialize Firebase (Placeholders - will work in 'demo' mode if keys missing)
         const firebaseConfig = {
             apiKey: "AIzaSyDemoKey", 
@@ -575,7 +546,7 @@
                 location_title: "Voter Domain 📍",
                 location_intro: "Map your constituency for real-time tracking.",
                 label_state: "Select Your State/UT",
-                opt_choose: "-- Choose State --",
+                opt_choose: "-- Choose State/UT --",
                 label_pc: "Parliamentary Constituency",
                 label_ac: "Assembly Constituency",
                 btn_hub: "Enter Hub",
@@ -605,7 +576,7 @@
                 location_title: "मतदाता क्षेत्र 📍",
                 location_intro: "वास्तविक समय की ट्रैकिंग के लिए अपने निर्वाचन क्षेत्र का मानचित्र बनाएं।",
                 label_state: "अपना राज्य/केंद्र शासित प्रदेश चुनें",
-                opt_choose: "-- राज्य चुनें --",
+                opt_choose: "-- राज्य/केंद्र शासित प्रदेश चुनें --",
                 label_pc: "संसदीय निर्वाचन क्षेत्र",
                 label_ac: "विधानसभा निर्वाचन क्षेत्र",
                 btn_hub: "हब में प्रवेश करें",
@@ -638,8 +609,8 @@
 
             // Update placeholders
             document.getElementById('yob').placeholder = currentLang === 'en' ? 'e.g. 1998' : 'उदा. 1998';
-            document.getElementById('pc').placeholder = currentLang === 'en' ? 'Region Name' : 'क्षेत्र का नाम';
-            document.getElementById('ac').placeholder = currentLang === 'en' ? 'Local Area Name' : 'स्थानीय क्षेत्र का नाम';
+            document.getElementById('pc').placeholder = currentLang === 'en' ? 'e.g. Chennai South' : 'उदा. चेन्नई दक्षिण';
+            document.getElementById('ac').placeholder = currentLang === 'en' ? 'e.g. Mylapore' : 'उदा. मायलापुर';
             document.getElementById('query').placeholder = currentLang === 'en' ? 'Ask about booths, ID rules, etc.' : 'बूथों, आईडी नियमों आदि के बारे में पूछें';
         }
 
