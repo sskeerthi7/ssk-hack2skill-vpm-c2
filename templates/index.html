@@ -397,54 +397,61 @@
                 <button class="outline" onclick="resetApp()" data-t="btn_reset">Reset</button>
             </article>
 
-            <!-- Location Selection -->
-            <article id="phase_location" class="card hidden" aria-labelledby="location-heading">
-                <h2 id="location-heading" data-t="location_title">Voter Domain 📍</h2>
-                <p class="intro-text" data-t="location_intro">Map your constituency for real-time tracking.</p>
+            <!-- Phase: Location Mapping -->
+            <div id="phase_location" class="card hidden">
+                <h2 data-t="location_title">Voter Domain 📍</h2>
+                <p data-t="location_intro">Map your constituency for real-time tracking.</p>
                 
-                <div class="form-group">
+                <div class="input-group">
                     <label for="state" data-t="label_state">Select Your State/UT</label>
-                    <select id="state" aria-required="true">
+                    <select id="state" onchange="updatePC()">
                         <option value="" data-t="opt_choose">-- Choose State --</option>
-                        {% for state in states %}
-                        <option value="{{ state }}">{{ state }}</option>
-                        {% endfor %}
+                        <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Maharashtra">Maharashtra</option>
+                        <option value="Gujarat">Gujarat</option>
+                        <option value="West Bengal">West Bengal</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Other">Other (General Info)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="pc" data-t="label_pc">Parliamentary Constituency</label>
+                    <select id="pc" onchange="updateAC()">
+                        <option value="">-- Select State First --</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="ac" data-t="label_ac">Assembly Constituency</label>
+                    <select id="ac">
+                        <option value="">-- Select PC First --</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="pc" data-t="label_pc">Parliamentary Constituency</label>
-                    <input type="text" id="pc" placeholder="Region Name">
+                <div style="display: flex; gap: 10px; margin-top: 2rem;">
+                    <button onclick="saveDetails()" data-t="btn_hub" class="btn-primary" style="flex: 2;">Enter Hub</button>
+                    <button onclick="resetApp()" data-t="btn_back" class="btn-secondary" style="flex: 1;">Back</button>
                 </div>
-                
-                <div class="form-group">
-                    <label for="ac" data-t="label_ac">Assembly Constituency</label>
-                    <input type="text" id="ac" placeholder="Local Area Name">
-                </div>
-                
-                <button onclick="saveDetails()" data-t="btn_hub">Enter Hub</button>
-                <button class="outline" onclick="resetApp()" data-t="btn_back">Back</button>
-            </article>
+            </div>
 
-            <!-- Election Hub -->
-            <article id="hub" class="card hidden" aria-labelledby="hub-heading">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h2 id="hub-heading" style="margin: 0; color: var(--saffron); font-size: 1.5rem;" data-t="hub_title">Election Hub</h2>
-                    <button class="reset-btn" onclick="resetApp()" aria-label="Exit Election Hub">ExitHub</button>
-                </div>
-                <div id="hub_content" aria-live="polite"></div>
+            <!-- Phase: Hub -->
+            <div id="hub" class="card hidden">
+                <h2 data-t="hub_title">Election Hub</h2>
+                <div id="hub_content"></div>
                 
-                <section style="margin-top: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 16px;" aria-labelledby="ai-heading">
-                    <h3 id="ai-heading" style="margin-top: 0;" data-t="ai_title">Ask AI Concierge</h3>
-                    <p style="font-size: 0.8rem; opacity: 0.7;" data-t="ai_source">Verified insights from <a href="https://www.eci.gov.in" target="_blank" rel="noopener" class="eci-link">eci.gov.in</a></p>
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="query" class="sr-only">Ask a question</label>
-                        <input type="text" id="query" placeholder="Ask about booths, ID rules, etc." onkeypress="if(event.key==='Enter') askAI()">
+                <div class="chat-section">
+                    <h3 data-t="ai_title">Ask AI Concierge</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" data-t="ai_source">Verified insights from eci.gov.in</p>
+                    <div class="input-group">
+                        <input type="text" id="query" placeholder="Ask about booths, ID rules, etc.">
                     </div>
-                    <button id="ask-btn" onclick="askAI()" style="background: var(--navy);" data-t="btn_ask">Consult AI</button>
-                    <div id="chat-results" class="hidden" aria-live="assertive" role="status"></div>
-                </section>
-            </article>
+                    <button id="ask-btn" onclick="askAI()" data-t="btn_ask" class="btn-primary" style="width: 100%;">Consult AI</button>
+                    <div id="chat-results" class="chat-box hidden"></div>
+                </div>
+
+                <button onclick="resetApp()" data-t="btn_reset" class="btn-secondary" style="width: 100%; margin-top: 2rem;">Reset</button>
+            </div>
         </div>
     </main>
 
@@ -462,6 +469,69 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
 
     <script>
+        // Mapping for Dependent Dropdowns
+        const constituencyMap = {
+            "Tamil Nadu": {
+                "Chennai North": ["Royapuram", "Dr. Radhakrishnan Nagar", "Perambur"],
+                "Chennai South": ["Saidapet", "T. Nagar", "Mylapore"],
+                "Chennai Central": ["Chepauk-Thiruvallikeni", "Thousand Lights", "Anna Nagar"]
+            },
+            "Maharashtra": {
+                "Mumbai North": ["Borivali", "Dahisar", "Magathane"],
+                "Mumbai South": ["Colaba", "Mumbadevi", "Malabar Hill"]
+            },
+            "Telangana": {
+                "Hyderabad": ["Malakpet", "Karwan", "Goshamahal", "Charminar"],
+                "Secunderabad": ["Musheerabad", "Amberpet", "Khairatabad"]
+            },
+            "Gujarat": {
+                "Ahmedabad East": ["Vatva", "Nikol", "Naroda"],
+                "Ahmedabad West": ["Ellis Bridge", "Amraiwadi", "Dariapur"]
+            },
+            "West Bengal": {
+                "Kolkata North": ["Chowrangee", "Entally", "Beliaghata"],
+                "Kolkata South": ["Kasba", "Behala Purba", "Behala Paschim"]
+            },
+            "Other": {
+                "General Region": ["Local Area 1", "Local Area 2"]
+            }
+        };
+
+        function updatePC() {
+            const state = document.getElementById('state').value;
+            const pcSelect = document.getElementById('pc');
+            const acSelect = document.getElementById('ac');
+            
+            pcSelect.innerHTML = '<option value="">-- Choose PC --</option>';
+            acSelect.innerHTML = '<option value="">-- Select PC First --</option>';
+
+            if (state && constituencyMap[state]) {
+                Object.keys(constituencyMap[state]).forEach(pc => {
+                    const opt = document.createElement('option');
+                    opt.value = pc;
+                    opt.innerText = pc;
+                    pcSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function updateAC() {
+            const state = document.getElementById('state').value;
+            const pc = document.getElementById('pc').value;
+            const acSelect = document.getElementById('ac');
+            
+            acSelect.innerHTML = '<option value="">-- Choose AC --</option>';
+
+            if (state && pc && constituencyMap[state][pc]) {
+                constituencyMap[state][pc].forEach(ac => {
+                    const opt = document.createElement('option');
+                    opt.value = ac;
+                    opt.innerText = ac;
+                    acSelect.appendChild(opt);
+                });
+            }
+        }
+
         // Initialize Firebase (Placeholders - will work in 'demo' mode if keys missing)
         const firebaseConfig = {
             apiKey: "AIzaSyDemoKey", 
