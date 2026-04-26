@@ -402,7 +402,7 @@
                 <h2 data-t="location_title">Voter Domain 📍</h2>
                 <p data-t="location_intro">Map your constituency for real-time tracking.</p>
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="state" data-t="label_state">Select Your State/UT</label>
                     <select id="state" onchange="updatePC()">
                         <option value="" data-t="opt_choose">-- Choose State --</option>
@@ -415,14 +415,14 @@
                     </select>
                 </div>
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="pc" data-t="label_pc">Parliamentary Constituency</label>
                     <select id="pc" onchange="updateAC()">
                         <option value="">-- Select State First --</option>
                     </select>
                 </div>
                 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="ac" data-t="label_ac">Assembly Constituency</label>
                     <select id="ac">
                         <option value="">-- Select PC First --</option>
@@ -443,7 +443,7 @@
                 <div class="chat-section">
                     <h3 data-t="ai_title">Ask AI Concierge</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;" data-t="ai_source">Verified insights from eci.gov.in</p>
-                    <div class="input-group">
+                    <div class="form-group">
                         <input type="text" id="query" placeholder="Ask about booths, ID rules, etc.">
                     </div>
                     <button id="ask-btn" onclick="askAI()" data-t="btn_ask" class="btn-primary" style="width: 100%;">Consult AI</button>
