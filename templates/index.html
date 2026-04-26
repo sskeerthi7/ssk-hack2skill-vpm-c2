@@ -347,7 +347,7 @@
             <nav class="header-links" aria-label="External ECI Links">
                 <a href="https://www.eci.gov.in" target="_blank" rel="noopener">ECI Home</a>
                 <a href="https://voters.eci.gov.in" target="_blank" rel="noopener">Voter Portal</a>
-                <a href="https://results.eci.gov.in" target="_blank" rel="noopener">Results</a>
+                <a href="https://results.eci.gov.in" target="_blank" rel="noopener">ECI Results</a>
             </nav>
         </div>
     </header>
@@ -501,7 +501,7 @@
         <p>
             <span data-t="footer_source">Official Data Source:</span> <a href="https://www.eci.gov.in" target="_blank" rel="noopener" class="eci-link">Election Commission of India</a>
             <br>
-            <span data-t="footer_dev">Developed for Hack2Skill VPM Challenge</span> 🇮🇳
+            <span data-t="footer_dev">Developed for <a href="https://hack2skill.com/" target="_blank" style="color: var(--saffron); text-decoration: none;">Hack2Skill</a> - <a href="https://promptwars.in/promptwarsVirtual.html" target="_blank" style="color: var(--white); text-decoration: none;">PromptWars: Virtual</a> - By <a href="https://www.linkedin.com/in/som-sai-keerthi/" target="_blank" style="color: var(--green); text-decoration: none;">SSK</a></span> 🇮🇳
         </p>
     </footer>
 
@@ -556,7 +556,7 @@
                 ai_source: "Verified insights from eci.gov.in",
                 btn_ask: "Consult AI",
                 footer_source: "Official Data Source:",
-                footer_dev: "Developed for Hack2Skill VPM Challenge",
+                footer_dev: "Developed for Hack2Skill - PromptWars: Virtual - By SSK",
                 consulting: "VoterOne Concierge is retrieving verification...",
                 status_label: "CURRENT STATUS",
                 map_label: "POLLING DOMAIN VISUALIZER"
@@ -586,7 +586,7 @@
                 ai_source: "eci.gov.in से सत्यापित जानकारी",
                 btn_ask: "AI से परामर्श लें",
                 footer_source: "आधिकारिक डेटा स्रोत:",
-                footer_dev: "Hack2Skill VPM चैलेंज के लिए विकसित",
+                footer_dev: "Hack2Skill - PromptWars: Virtual - SSK द्वारा विकसित",
                 consulting: "VoterOne कंसीयर्ज सत्यापन प्राप्त कर रहा है...",
                 status_label: "वर्तमान स्थिति",
                 map_label: "मतदान क्षेत्र विजुअलाइज़र"
@@ -648,6 +648,11 @@
             });
             const data = await res.json();
             
+            if (!res.ok) {
+                alert(data.error || data.message || "Validation failed.");
+                return;
+            }
+
             document.getElementById('phase_init').classList.add('hidden');
             if (data.eligible) {
                 document.getElementById('phase_location').classList.remove('hidden');
@@ -727,6 +732,14 @@
                     <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 10px;">${status.Status}</p>
                     ${status.Description ? `<p style="font-size: 0.9rem; opacity: 0.8; line-height: 1.4;">${status.Description}</p>` : ''}
                     ${status['Poll Date'] ? `<p style="margin: 10px 0 0 0; font-size: 0.95rem;">📅 <b>Poll Date:</b> ${status['Poll Date']}</p>` : ''}
+                    ${status['Counting Date'] ? `<p style="margin: 5px 0 0 0; font-size: 0.95rem;">📊 <b>Counting Date:</b> ${status['Counting Date']}</p>` : ''}
+                    ${status['Results URL'] ? `
+                        <div style="margin-top: 15px;">
+                            <a href="${status['Results URL']}" target="_blank" class="download-btn" style="background: var(--navy); margin-top: 0; padding: 10px; font-size: 0.9rem;">
+                                📈 Check Results on ECI Site
+                            </a>
+                        </div>
+                    ` : ''}
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
@@ -742,7 +755,7 @@
                     </div>
                 </div>
 
-                <a href="https://voters.eci.gov.in" target="_blank" rel="noopener" style="color: var(--green); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                <a href="https://electoralsearch.eci.gov.in/" target="_blank" rel="noopener" style="color: var(--green); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 8px;">
                     🔍 Find My Polling Station →
                 </a>
             `;
@@ -774,7 +787,16 @@
                 if (!res.ok) {
                     chatDiv.innerHTML = `<span style='color: #f87171;'><b>Analyzer Error:</b><br>${data.response || 'Unknown server error'}</span>`;
                 } else {
-                    chatDiv.innerHTML = `<b>Official Guidance:</b><br>${data.response}`;
+                    // Convert markdown links to open in new tab
+                    let processedResponse = data.response.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color: var(--saffron); text-decoration: underline;">$1</a>');
+                    
+                    // Convert raw URLs to links (avoiding those already in <a> tags)
+                    processedResponse = processedResponse.replace(/(?<!href=")(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: var(--saffron); text-decoration: underline;">$1</a>');
+                    
+                    chatDiv.innerHTML = `<b>Official Guidance:</b><br>${processedResponse}`;
+                    
+                    // Save to Chat History
+                    saveChatHistory(query, data.response);
                 }
             } catch (e) {
                 console.error(e);
@@ -784,6 +806,49 @@
                 btn.innerText = translations[currentLang].btn_ask;
             }
         }
+
+        function saveChatHistory(q, r) {
+            let history = JSON.parse(localStorage.getItem('voterOneChats') || '[]');
+            history.unshift({query: q, response: r, time: new Date().toLocaleTimeString()});
+            if (history.length > 5) history = history.slice(0, 5);
+            localStorage.setItem('voterOneChats', JSON.stringify(history));
+            renderChatHistory();
+        }
+
+        function renderChatHistory() {
+            const history = JSON.parse(localStorage.getItem('voterOneChats') || '[]');
+            if (history.length === 0) return;
+
+            let historyHtml = `<div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem;">Recent Consultations</p>`;
+            
+            history.forEach((item, index) => {
+                let procResp = item.response.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color: var(--saffron);">$1</a>');
+                procResp = procResp.replace(/(?<!href=")(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" style="color: var(--saffron);">$1</a>');
+                
+                historyHtml += `
+                    <div style="margin-bottom: 1rem; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+                        <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: var(--saffron);"><b>Q:</b> ${item.query}</p>
+                        <p style="margin: 0; font-size: 0.85rem; opacity: 0.8;"><b>A:</b> ${procResp}</p>
+                    </div>
+                `;
+            });
+            historyHtml += `</div>`;
+            
+            // Append or replace history container
+            let container = document.getElementById('chat-history-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'chat-history-container';
+                document.querySelector('.chat-section').appendChild(container);
+            }
+            container.innerHTML = historyHtml;
+        }
+
+        // Call render on load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderChatHistory();
+        });
     </script>
 </body>
 </html>

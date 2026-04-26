@@ -55,6 +55,8 @@ if api_key:
     system_instruction = (
         "You are VoterOne, an Indian Election Concierge. "
         "Source of truth: www.eci.gov.in, voters.eci.gov.in. "
+        "Strict Rule: Only answer queries related to Indian elections. If the user asks about anything else (e.g., cooking, coding, sports), politely decline and remind them that you are an Indian Election Concierge. "
+        "Formatting Rule: Always use markdown for links and ensure they open in a new tab where possible (by following standard markdown practice). "
         "Be professional, patriotic, and concise. "
         "Always remind users that you are an AI assistant and they should verify details on the official ECI website."
     )
@@ -82,20 +84,22 @@ ELECTION_DATA_2026 = {
         "States": ["Tamil Nadu", "Maharashtra", "Gujarat", "West Bengal"],
         "Poll Date": datetime.date(2026, 4, 23),
         "Counting Date": datetime.date(2026, 5, 4),
+        "Results URL": "https://results.eci.gov.in",
         "Status": "Polls Completed. Counting in Progress.",
         "Description": "The main polling phase for 2026 has concluded. Verification of machines is underway."
     },
     "Completed": {
         "States": ["Assam", "Kerala", "Puducherry"],
         "Poll Date": datetime.date(2026, 4, 9),
+        "Counting Date": datetime.date(2026, 4, 25),
+        "Results URL": "https://results.eci.gov.in",
         "Status": "Result Tracking Active.",
         "Description": "Results are being tallied. Final winner declarations are expected shortly."
     },
     "Telangana": {
         "Municipal Poll Date": datetime.date(2026, 2, 11),
-        "Next Focus": "GHMC (Hyderabad) Corporations Elections",
         "Status": "Active Preparation for Municipal Polls.",
-        "Description": "State-wide municipal polls completed in Feb. GHMC elections are the next priority."
+        "Description": "State-wide municipal polls completed in Feb. Local bodies are gearing up for the next cycle."
     }
 }
 
@@ -115,6 +119,12 @@ def init_voter():
         return jsonify({"error": "Invalid year of birth"}), 400
         
     current_year = 2026 # Context year
+    
+    if year_of_birth > current_year:
+        return jsonify({"error": "Year of birth cannot be in the future."}), 400
+    if year_of_birth < 1900:
+        return jsonify({"error": "Please enter a valid year of birth."}), 400
+
     age = current_year - year_of_birth
     
     response = {
@@ -155,8 +165,19 @@ def save_details():
     
     # Map the state to its 2026 status
     status = None
+    today = datetime.date(2026, 4, 26)
+    three_months_later = today + datetime.timedelta(days=90)
+
     for phase, info in ELECTION_DATA_2026.items():
         if phase != "Telangana" and state in info.get("States", []):
+            poll_date = info.get("Poll Date")
+            # Check if poll date is within 3 months (past or future)
+            # Actually user wants "scheduled in next 3 months"
+            # But if it just passed, we should show it too.
+            # If it's more than 3 months away, say "No elections scheduled currently"
+            if poll_date:
+                if poll_date > three_months_later:
+                    continue # Too far away
             status = info
             break
     
@@ -164,7 +185,7 @@ def save_details():
         status = ELECTION_DATA_2026["Telangana"]
     
     if not status:
-        status = {"Status": "General Info", "Description": "Elections scheduled for 2026. Stay tuned for dates."}
+        status = {"Status": "No elections scheduled currently", "Description": "Stay tuned for upcoming election announcements from ECI."}
 
     # Serialize dates
     serialized_status = {}
